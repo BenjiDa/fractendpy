@@ -1,3 +1,2 @@
 cuts
 __pycache__
-__future__

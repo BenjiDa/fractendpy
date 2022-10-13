@@ -1,111 +1,68 @@
-# /*%   FracTend.m - script to plot slip and dilatation tendency  
-# %   
-# %   Equations & code from:
-# %       Morris et al., 1996 Geology
-# %       Ferrill et al., 1999 GSA Today 
-# %       Streit & Hillis, 2004 Energy
-# %       Jolly & Sanderson, 1997 Journal of Structural Geology 
-# %       Allmendinger et al., 2012 Structural Geology Algorithms, Cambridge
-# %       University Press
-# %
-# %   David Healy & Tara Stephens  
-# %   July 2018 
-# %   d.healy@abdn.ac.uk*/
-'''
-    fractendpy converted to python by Ben Melosh
+#    FracTend.m - script to plot slip and dilatation tendency  
+#    
+#    Equations & code from:
+#       Morris et al., 1996 Geology
+#        Ferrill et al., 1999 GSA Today 
+#        Streit & Hillis, 2004 Energy
+#        Jolly & Sanderson, 1997 Journal of Structural Geology 
+#        Allmendinger et al., 2012 Structural Geology Algorithms, Cambridge
+#        University Press
+# 
+#    David Healy & Tara Stephens  
+#    July 2018 
+#    d.healy@abdn.ac.uk*/
 
-    fractendpy requires poles, 
+'''
+    fractendpy converted to python by Ben Melosh Oct. 2022 from FracTend.m by David Healy and Tara Stephens
+
+    fractendpy requires pole, 
 '''
 
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from utils import stcoordline
-from geometric import pole
-from stress import principalstress
-from shear import shearonplane
+from utils.conversions import stcoordline
+from utils.geometric import pole
+from utils.stress import principalstress
+from utils.shear import shearonplane
 
-#from plot_mohr_oa import plot_mohr_oa
 
 import pdb
 
-#   read in poles to specific fractures; tab-delimited text file, 
-#    formatted as plunge then trend 
-print(' ') 
-print('Reading input file of poles to planes...')   
-fractures_file = 'Utah_OA-Sills.txt' ;  # 'Utah_Thrusts_TS-RW. Utah_Sills_ArcRW. Utah_DefBands2RW. Utah_OA-Sills
 
-fracture_poles = np.loadtxt(fractures_file)
-n_fractures = len(fracture_poles)
-fracture_poles_rad = fracture_poles * np.pi / 180 
-print('Read ', n_fractures, ' fracture poles')  
+class stress_state():
 
-
-
-
-def stress_tensor(sigma1, sigma2, sigma3):#, Pf, trend_s1, plunge_s1, trend_s3):
-
-    '''
-    Returns 
-    stress_tensor: 3x3 stress tensor with principal stresses
-    sorted_sigma: 1X3 array with principal stresses
-    sigmad: differential stress
-
-    '''
-
-
-    sorted_sigma = [sigma1, sigma2, sigma3] 
-    sigmad = sigma1 - sigma3
-    stress_tensor = np.diag(sorted_sigma) #   Generate stress tensor. note the implicit convention: x//s1, y//s2, z//s3
-    print('Principal stresses ', sorted_sigma, ' in MPa')
-
-    #trend_s1_rad = trend_s1 * np.pi / 180
-    #plunge_s1_rad = plunge_s1 * np.pi / 180 
-    #trend_s3_rad = trend_s3 * np.pi / 180
-
-
-    return stress_tensor, sorted_sigma, sigmad
+    def __init__(self, sigma1, sigma2, sigma3, Pf, trend_s1, plunge_s1, trend_s3):
+        self.sigma1 = []
+        self.sigma2 = []
+        self.sigma3 = []
+        self.Pf = []
+        self.trend_s1 = []
+        self.plunge_s1 = []
+        self.trend_s3 = []
 
 
 
+    def stress_tensor(self, sigma1, sigma2, sigma3):#, Pf, trend_s1, plunge_s1, trend_s3):
 
-## User inputs:
+        '''
+        Returns 
+        stress_tensor: 3x3 stress tensor with principal stresses
+        sorted_sigma: 1X3 array with principal stresses
+        sigmad: differential stress
 
-#   read in stress magnitudes 
-#   principal stresses in MPa 
-sigma1 = 43       
-sigma2 = 38.86     
-sigma3 = 25 
-
-Pf = 37.24 # pore fluid pressure in MPa, for fracture Opening Angle calculations
-
-
-#   read in stress orientation 
-#   e.g. for old case of SHmax azimuth of 135 
-# normal fault system: Trend s1=0, Plunge s1=90 - use s3-trend to change orientation of stress field with s1 as the rotation axis
-# thrust fault: Trend of s3 must be >90 from s1; Ps1=0
-# strike-slip: Trend of s3 must be 90 from Trend of s1
-trend_s1 = 68 
-plunge_s1 =  3    
-trend_s3 = 265 
+        '''
 
 
+        sorted_sigma = [sigma1, sigma2, sigma3] 
+        sigmad = sigma1 - sigma3
+        stress_tensor = np.diag(sorted_sigma) #   Generate stress tensor. note the implicit convention: x//s1, y//s2, z//s3
+
+        #trend_s1_rad = trend_s1 * np.pi / 180
+        #plunge_s1_rad = plunge_s1 * np.pi / 180 
+        #trend_s3_rad = trend_s3 * np.pi / 180
 
 
-
-sorted_sigma = [sigma1, sigma2, sigma3]
-sigmad = sigma1 - sigma3
-stress_tensor = np.diag(sorted_sigma) #   Generate stress tensor. note the implicit convention: x//s1, y//s2, z//s3
-
-#stress_tensor = xyxyx(43, 38.86, 25)       
-
- 
-
-  
-print('Stress orientation:')                   
- 
-
+        return stress_tensor, sorted_sigma, sigmad
 
 
 
@@ -160,7 +117,7 @@ def normal_and_shear_stress(stress_tensor, trend_s1, plunge_s1, trend_s3):
     return sigmaN, tau
         
 
-def tendencies(sigmaN, tau, sorted_sigma, mu_static):
+def tendencies(sigmaN, tau, sorted_sigma, mu_static, Pf):
     #   calculate tendencies - slip, dilatation and frac. suscep
     #   calculate normalised slip tendency (Morris et al., 1996)
 
@@ -181,7 +138,7 @@ def tendencies(sigmaN, tau, sorted_sigma, mu_static):
     OA = tau / (Pf - sigmaN)
     muOAfracture = np.arctan(OA) * (180/np.pi)
 
-    return Ts, Td, TD, Sf, OA, muOAfracture
+    return TsMax, Ts, Td, TD, Sf, OA, muOAfracture
 
 
 def stress_ratios(sigma1, sigma2, sigma3):
@@ -221,7 +178,10 @@ def equal_area_projection(phiP, thetaP):
     return dp, xeqarea, yeqarea, rPrim, xPrim, yPrim
 
 
-def pole_to_cart(fracture_poles_rad):
+def pole_to_cart(fracture_poles):
+
+
+    fracture_poles_rad = fracture_poles * np.pi / 180
 
     #  convert Fracture pole plunges and plunge directions to cartesian coords    
     dp = np.sqrt(1 - np.sin(fracture_poles_rad[:,0])) 
@@ -258,7 +218,7 @@ def stress_to_cart(stress_tensor, trend_s1, plunge_s1, trend_s3):
 
 
 
-def write_stress_to_file():
+def write_stress_to_file(fracture_poles, stress_tensor, sorted_sigma, TsMax, mu_static, Pf, trend_s1, plunge_s1, trend_s3):
     
     '''
     Calculates stress and shear values for each supplied pole, returns .csv file
@@ -268,6 +228,16 @@ def write_stress_to_file():
     #%   for each plane in the input file
     #%   new loop to calculate specifc values for the supplied poles 
     #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+
+    fracture_poles_rad = fracture_poles * np.pi / 180
+    n_fractures = len(fracture_poles)
+
+    # convert stress orientations into radians
+    trend_s1_rad = trend_s1 * np.pi / 180
+    plunge_s1_rad = plunge_s1 * np.pi / 180 
+    trend_s3_rad = trend_s3 * np.pi / 180
+
+
     sigmaNFracture = np.zeros((n_fractures,1))  
     tauFracture = np.zeros((n_fractures,1))  
     for i in range(0, n_fractures):
@@ -291,7 +261,7 @@ def write_stress_to_file():
     TdFractureFile = ( sorted_sigma[0] - sigmaNFracture ) / ( sorted_sigma[0] - sorted_sigma[2] )     
 
     #   calculate fracture susceptibility
-    SfFractureFile = sigmaNFracture - ( tauFracture / muStatic ) 
+    SfFractureFile = sigmaNFracture - ( tauFracture / mu_static ) 
 
     #   calculate opening angle
     OAFile = tauFracture / (Pf - sigmaNFracture) 
