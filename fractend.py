@@ -1,28 +1,19 @@
-#    FracTend.m - script to plot slip and dilatation tendency  
-#    
-#    Equations & code from:
-#       Morris et al., 1996 Geology
-#        Ferrill et al., 1999 GSA Today 
-#        Streit & Hillis, 2004 Energy
-#        Jolly & Sanderson, 1997 Journal of Structural Geology 
-#        Allmendinger et al., 2012 Structural Geology Algorithms, Cambridge
-#        University Press
-# 
-#    David Healy & Tara Stephens  
-#    July 2018 
-#    d.healy@abdn.ac.uk*/
-
-'''
-    fractendpy converted to python by Ben Melosh Oct. 2022 from FracTend.m by David Healy and Tara Stephens
-
-    fractendpy requires pole, 
-'''
-
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 from sga import stcoordline, pole, principalstress, shearonplane
+
+'''
+    fractendpy is the python version of FracTend by David Healy & Tara Stephens (July 2018), it runs on a base of code from
+    Allmendinger et al., 2012 "Structural geology algorithms".  Additional equations and code from Morris et al., 1996 Geology; 
+    Streit & Hillis, 2004 Energy; Jolly & Sanderson, 1997 Journal of Structural Geology. 
+
+    Requires numpy and matplotlib
+
+    Oct 2022
+    Ben Melosh
+'''
 
 
 
