@@ -122,8 +122,8 @@ class stress_state():
 
     def tendencies(self):#sigmaN, tau, sorted_sigma, mu_static, Pf):
         #   calculate tendencies - slip, dilatation and frac. suscep
+        
         #   calculate normalised slip tendency (Morris et al., 1996)
-
         self.TsMax = (self.tau / self.sigmaN ).max() 
         self.Ts = ( self.tau / self.sigmaN ) / self.TsMax  
 
@@ -275,14 +275,16 @@ class stress_state():
         muOAfractureFile = np.arctan(OAFile) * (180/np.pi) 
 
         #   write out text file of data values for the specific fracture poles
-        all_data_for_export = np.hstack((self.fracture_poles, TsFractureFile, TdFractureFile, SfFractureFile, self.tauFracture, self.sigmaNFracture, muOAfractureFile))
+        self.all_data_for_export = np.hstack((self.fracture_poles, TsFractureFile, TdFractureFile, SfFractureFile, self.tauFracture, self.sigmaNFracture, muOAfractureFile))
 
-        np.savetxt("fracture_poles.csv", 
-            all_data_for_export, 
+        np.savetxt("ftp_results.csv", 
+            self.all_data_for_export, 
             delimiter=',', 
             fmt='%2.2f'+','+'%3.2f'+','+'%1.3f'+','+'%1.3f'+','+'%5.2f'+','+'%5.2f'+','+'%5.2f'+','+'%5.3f', 
             header='plunge'+','+'trend'+','+'Ts'+','+'Td'+','+'Sf'+','+'tau'+','+'sigmaN'+','+'muOA', 
             comments='')
+
+        return self.all_data_for_export
 
 
     def stereonet_plot(self, dataset, dataset_name='dataset_name'):#stress_tensor, stress_orientations, increment, fracture_poles, ncontours, '):
@@ -314,10 +316,13 @@ class stress_state():
      
         ax.plot(self.xPrim, self.yPrim, '-k', linewidth=1)  
         ax.plot(self.xPrim, self.yPrim*-1, '-k', linewidth=1) 
-        ax.plot(self.xFractures, self.yFractures, '.r', markersize=15) 
-        ax.plot(self.xS1, self.yS1, 's', markersize=10, markeredgecolor='k', markerfacecolor='w')  
-        ax.plot(self.xS2, self.yS2, 'd', markersize=10, markeredgecolor='k', markerfacecolor='w')  
+        ax.plot(self.xFractures, self.yFractures, '.r',markeredgecolor='k', markersize=15) 
+        ax.plot(self.xS1, self.yS1, 's', markersize=10, markeredgecolor='k', markerfacecolor='w')
+        ax.annotate(text='\u03C3'+'1', xy=(self.xS1+0.05, self.yS1+0.05))  
+        ax.plot(self.xS2, self.yS2, 'd', markersize=10, markeredgecolor='k', markerfacecolor='w') 
+        ax.annotate(text='\u03C3'+'2', xy=(self.xS2+0.05, self.yS2+0.05))  
         ax.plot(self.xS3, self.yS3, '^', markersize=10, markeredgecolor='k', markerfacecolor='w')
+        ax.annotate(text='\u03C3'+'3', xy=(self.xS3+0.05, self.yS3+0.05)) 
         ax.set_xticks([])
         ax.set_yticks([])
      
@@ -334,7 +339,7 @@ class stress_state():
 
         fig.axes[0].set_title('{}'.format(dataset_name) + ' n={}'.format(n_fractures))
         
-        fig.savefig("./figures/{}_stereo.pdf".format(dataset_name), dpi=300, transparent=True)
+        fig.savefig("./{}_stereo.pdf".format(dataset_name), dpi=300, transparent=True)
         plt.show()
 
 
@@ -406,7 +411,7 @@ class stress_state():
         ax.set_xlabel('Effective normal stress, MPa') 
         ax.set_ylabel('Shear stress, MPa') 
         plt.title('{}'.format(dataset_name)+' n='+'{}'.format(n_fractures)) 
-        fig.savefig("./figures/{}_mohr.pdf".format(dataset_name), dpi=300, transparent=True) 
+        fig.savefig("./{}_mohr.pdf".format(dataset_name), dpi=300, transparent=True) 
 
      
         plt.show()

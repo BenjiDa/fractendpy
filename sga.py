@@ -180,11 +180,11 @@ def pole(trd, plg, k):
     
        k is an integer that tells the program what to calculate. 
     
-       If k = 0, [trd1,plg1] = Pole(trd,plg,k) returns the strike 
+       If k = 0, [trd1,plg1] = pole(trd,plg,k) returns the strike 
        (trd1) and dip (plg1) of a plane, given the trend (trd) 
        and plunge (plg) of its pole.
     
-       If k = 1, [trd1,plg1] = Pole(trd,plg,k) returns the trend
+       If k = 1, [trd1,plg1] = pole(trd,plg,k) returns the trend
        (trd1) and plunge (plg1) of a pole, given the strike (trd)
        and dip (plg) of its plane.
     
@@ -439,6 +439,8 @@ def principalstress(stress,tX1,pX1,tX3):
     dCp[2] = [tV[0][0],tV[1][0],tV[2][0]]
     [pstress[2][1],pstress[2][2]] = carttosph(tV[0][0],tV[1][0],tV[2][0])
 
+    pstress = np.flip(pstress, axis=0)
+    dCp = np.flip(dCp, axis=0)
 
     return [pstress,dCp]
 
