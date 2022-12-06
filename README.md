@@ -55,11 +55,14 @@ ss.mohr_plot(ss.sigmaN, 'Normal stress') # plotting functions for mohr circles d
 
 Results include a data table with all results for each fault surface and plots.
 
+![SF_Slip susceptibility (MPa)_stereo](https://user-images.githubusercontent.com/18178879/206011926-59da4e3c-b533-49d3-919b-7128a0ef7e26.jpg)
+
 
 ## To do: 
 
 Finish tests for structural geology algorithms (sga.py) code from Cardozo and Allmendinger et al. (2012)
 Finish tests for fractend
+
 
 
 
