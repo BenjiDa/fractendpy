@@ -51,7 +51,9 @@ ss = stress_state(fracture_poles, sigma1, sigma2, sigma3, trend_s1, plunge_s1, t
 ss.stereonet_plot(ss.tau, 'Shear stress (MPa)')
 ss.stereonet_plot(ss.sigmaN, 'Normal stress (MPa)')
 ss.mohr_plot(ss.sigmaN, 'Normal stress') # plotting functions for mohr circles don't work well yet.
+```
 
+Results include a data table with all results for each fault surface and plots.
 
 
 ## To do: 
