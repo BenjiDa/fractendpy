@@ -39,6 +39,24 @@ class test_sga():
 		#self.assertEqual(dircosaxes(0, 1.570796, 1.570796), np.array([[ 3.26794897e-07,  0.00000000e+00,  1.00000000e+00], [ 1.00000000e+00, -3.26794897e-07, -3.26794897e-07],[ 3.26794897e-07,  1.00000000e+00, -1.06794904e-13]])
 		#self.assertEqual(dircosaxes(0, 1.570796, -1.570796), np.array([[ 3.26794897e-07,  0.00000000e+00,  1.00000000e+00], [-1.00000000e+00, -3.26794897e-07,  3.26794897e-07],[ 3.26794897e-07, -1.00000000e+00, -1.06794904e-13]])
 
+	def test_shearonplane(stress,tX1,pX1,tX3,strike,dip):
+
+		trend_s1 = np.radians(26) 
+		plunge_s1 = np.radians(0)
+		trend_s3 = np.radians(116)
+
+		stike = np.radians(20)
+		dip = np.radians(10)
+
+		sigma1 = 50
+		sigma2 = 20
+		sigma3 = 5
+		sorted_sigma = [sigma1, sigma2, sigma3]
+		stress = np.diag(sorted_sigma)
+
+		[TT,dCTT,R] = shearonplane(stress, trend_s1, plunge_s1, trend_s3, strike, dip)
+
+		#self.assertEqual(shearonplane(stress, trend_s1, plunge_s1, trend_s3, stike, dip), 
 
 
 if __name__ == '__main__':

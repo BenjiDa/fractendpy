@@ -111,11 +111,15 @@ class stress_state():
                 #   calculate normal and shear stress on the plane
                 [stress_fracture, dc_stress_fracture, R] = shearonplane(self.stress_tensor, self.trend_s1_rad, self.plunge_s1_rad, self.trend_s3_rad, strike, dip) 
 
+                np.nan_to_num(stress_fracture, copy=False, nan=0.0) # This line converts nan values into zero, nan values are generated when
+                #the dip of the surface is parallel to sigma 1 and sigma 3
+
                 #   save normal and shear stresses for later calculation
                 self.sigmaN[idt][idp] = stress_fracture[0][0]#(1,1) 
                 self.tau[idt][idp] = stress_fracture[2][0]#(3,1)
 
-        
+        # import pdb
+        # pdb.set_trace()
         #return sigmaN, tau
         
         
@@ -222,6 +226,9 @@ class stress_state():
         [self.xS2, self.yS2] = stcoordline(trendS2rad, plungeS2rad, 1)   
         [self.xS3, self.yS3] = stcoordline(trend_s3_rad, plungeS3rad, 1)
 
+        # import pdb
+        # pdb.set_trace()
+
         #return    xS1, yS1, xS2, yS2, xS3, yS3
 
 
@@ -313,7 +320,7 @@ class stress_state():
         fig, ax = plt.subplots(1, figsize=(6,6))
 
         sn = plt.contourf(self.xeqarea, self.yeqarea, dataset, self.ncontours)#, 'EdgeColor', 'none')  
-     
+        
         ax.plot(self.xPrim, self.yPrim, '-k', linewidth=1)  
         ax.plot(self.xPrim, self.yPrim*-1, '-k', linewidth=1) 
         ax.plot(self.xFractures, self.yFractures, '.r',markeredgecolor='k', markersize=15) 

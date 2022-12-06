@@ -180,11 +180,11 @@ def pole(trd, plg, k):
     
        k is an integer that tells the program what to calculate. 
     
-       If k = 0, [trd1,plg1] = Pole(trd,plg,k) returns the strike 
+       If k = 0, [trd1,plg1] = pole(trd,plg,k) returns the strike 
        (trd1) and dip (plg1) of a plane, given the trend (trd) 
        and plunge (plg) of its pole.
     
-       If k = 1, [trd1,plg1] = Pole(trd,plg,k) returns the trend
+       If k = 1, [trd1,plg1] = pole(trd,plg,k) returns the trend
        (trd1) and plunge (plg1) of a pole, given the strike (trd)
        and dip (plg) of its plane.
     
@@ -260,31 +260,39 @@ def dircosaxes(tX1,pX1,tX3):
     #Direction cosines of X1
     [dC[0,0],dC[0,1],dC[0,2]] = sphtocart(tX1,pX1,0)
 
+
     #Calculate plunge of axis 3
     #If axis 1 is horizontal
     if pX1 == 0.0:
-        if np.abs(tX1-tX3) == east or np.abs(tX1-tX3) == west: ##Check this line
+        if np.round_(np.abs(tX1-tX3),8)  == np.round_(east,8) or np.round_(np.abs(tX1-tX3),8) == np.round_(west,8): ##Check this line
             pX3 = 0.0
         else:
             pX3 = east
+
 
     #Else
     else:
         #From Equation 2.14 and with theta equal to 90 degrees
         pX3 = np.arctan(-(dC[0,0]*np.cos(tX3)+dC[0,1]*np.sin(tX3))/dC[0,2])
 
+       
+
     #%Direction cosines of X3
     [dC[2,0],dC[2,1],dC[2,2]] = sphtocart(tX3,pX3,0)
 
+
     #Compute direction cosines of X2 by the cross product of X3 and X1
-    dC[1,0] = dC[2,1]*dC[0,2] - dC[2,2]*dC[0,1]
-    dC[1,1] = dC[2,2]*dC[0,0] - dC[2,0]*dC[0,2]
-    dC[1,2] = dC[2,0]*dC[0,1] - dC[2,1]*dC[0,0]
+    # dC[1,0] = dC[2,1]*dC[0,2] - dC[2,2]*dC[0,1]
+    # dC[1,1] = dC[2,2]*dC[0,0] - dC[2,0]*dC[0,2]
+    # dC[1,2] = dC[2,0]*dC[0,1] - dC[2,1]*dC[0,0]
+    dC[1] = np.cross(dC[0], dC[2])
+
 
     # Convert X2 to a unit vector
     r = np.sqrt(dC[1,0]*dC[1,0]+dC[1,1]*dC[1,1]+dC[1,2]*dC[1,2])
     for i in range(1,3):
         dC[1,i] = dC[1,i]/r
+
 
     return dC
 
@@ -387,6 +395,7 @@ def principalstress(stress,tX1,pX1,tX3):
     #Compute direction cosines of X1,X2,X3
     dC = dircosaxes(tX1,pX1,tX3)
 
+
     #Calculate the eigenvalues and eigenvectors of the stress tensor. Use
     #MATLAB function eig. D is a diagonal matrix of eigenvalues
     #(i.e. principal stress magnitudes), and V is a full matrix whose columns
@@ -439,6 +448,8 @@ def principalstress(stress,tX1,pX1,tX3):
     dCp[2] = [tV[0][0],tV[1][0],tV[2][0]]
     [pstress[2][1],pstress[2][2]] = carttosph(tV[0][0],tV[1][0],tV[2][0])
 
+    pstress = np.flip(pstress, axis=0)
+    dCp = np.flip(dCp, axis=0)
 
     return [pstress,dCp]
 
@@ -493,6 +504,7 @@ def shearonplane(stress,tX1,pX1,tX3,strike,dip):
     else:
         dCTT = np.zeros((3,3))
 
+
     # Compute principal stresses and principal stress directions
     [pstress,dCp] = principalstress(stress,tX1,pX1,tX3)
 
@@ -540,9 +552,11 @@ def shearonplane(stress,tX1,pX1,tX3,strike,dip):
         B = np.zeros((1,3), dtype = np.complex_)
     else:
         B = np.zeros((1,3))
-    B[0][0] = T[0][1]*pT[0][2] - T[0][2]*pT[0][1]
-    B[0][1] = T[0][2]*pT[0][0] - T[0][0]*pT[0][2]
-    B[0][2] = T[0][0]*pT[0][1] - T[0][1]*pT[0][0]
+    # B[0][0] = T[0][1]*pT[0][2] - T[0][2]*pT[0][1]
+    # B[0][1] = T[0][2]*pT[0][0] - T[0][0]*pT[0][2]
+    # B[0][2] = T[0][0]*pT[0][1] - T[0][1]*pT[0][0]
+
+    B = np.cross(T, pT)
 
 
     # Find the shear direction by the cross product of pT cross B. This will
@@ -551,17 +565,31 @@ def shearonplane(stress,tX1,pX1,tX3,strike,dip):
         S = np.zeros((1,3), dtype = np.complex_)
     else:
         S = np.zeros((1,3))
-    S[0][0] = pT[0][1]*B[0][2] - pT[0][2]*B[0][1]
-    S[0][1] = pT[0][2]*B[0][0] - pT[0][0]*B[0][2]
-    S[0][2] = pT[0][0]*B[0][1] - pT[0][1]*B[0][0]
+    # S[0][0] = pT[0][1]*B[0][2] - pT[0][2]*B[0][1]
+    # S[0][1] = pT[0][2]*B[0][0] - pT[0][0]*B[0][2]
+    # S[0][2] = pT[0][0]*B[0][1] - pT[0][1]*B[0][0]
+    S = np.cross(pT, B)
+
 
     # New: Convert B and S to unit vectors
-    rB = np.sqrt(B[0][0]*B[0][0]+B[0][1]*B[0][1]+B[0][2]*B[0][2])
-    rS = np.sqrt(S[0][0]*S[0][0]+S[0][1]*S[0][1]+S[0][2]*S[0][2])
+    # rB = np.sqrt(B[0][0]*B[0][0]+B[0][1]*B[0][1]+B[0][2]*B[0][2])
+    # rS = np.sqrt(S[0][0]*S[0][0]+S[0][1]*S[0][1]+S[0][2]*S[0][2])
+    # for i in range(0,3):
+    # B[0][i] = B[0][i]/rB
+    # S[0][i] = S[0][i]/rS
 
-    for i in range(0,3):
-        B[0][i] = B[0][i]/rB
-        S[0][i] = S[0][i]/rS
+    # Convert B and S to unit vectors, if B or S has a unit length of zero
+    # then leave as zero rather than nan.
+    if np.linalg.norm(B) == 0:
+        B = B
+    else: 
+        B /= np.linalg.norm(B)
+
+    if np.linalg.norm(S) == 0:
+        S = S
+    else:
+        S /= np.linalg.norm(S)
+
 
     # Now we can write the transformation matrix from principal stress
     # coordinates to plane coordinates (Eq. 6.28)
