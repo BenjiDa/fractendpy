@@ -13,7 +13,7 @@ pore fluid pressure, cohesion, etc. Then save and run "python fractend_run.py" i
 
 ```
 fractures_file = r'C:\Users\path\to\your\data.csv'   # Must be two columns of plunge and trend of pole to fault plane
-
+fracture_poles = np.loadtxt(fractures_file, skiprows=1, delimiter=',')
 
 # Example user imputs
 #   read in stress magnitudes 
